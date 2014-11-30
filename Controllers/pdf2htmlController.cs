@@ -17,11 +17,12 @@ namespace HelloMvc.Controllers.Controllers
         public async Task<IActionResult> Post()
         {
             var body = Request.Body;
-            var fileName = String.Format("Convert_{0}", Guid.NewGuid());
+            var fileName = String.Format("/src/Convert_{0}", Guid.NewGuid());
 
             using (FileStream fs = System.IO.File.Create(fileName + ".pdf"))
             {
                 await body.CopyToAsync(fs);
+                fs.Close();
             }
 
             var p = new Process();
@@ -30,9 +31,7 @@ namespace HelloMvc.Controllers.Controllers
             p.Start();
             p.WaitForExit();
 
-            var buffer = System.IO.File.ReadAllBytes(fileName + ".html");
-
-            return new FileContentResult(buffer, "text/html");
+            return Content(System.IO.File.ReadAllText(fileName + ".html"));
         }
     }
 }

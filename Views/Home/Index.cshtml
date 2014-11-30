@@ -26,6 +26,11 @@
         var reader = new FileReader();
         var xhr = new XMLHttpRequest();
 
+        xhr.onload = function () {
+            console.log(this.responseText);
+            document.getElementById('DropZone').innerHTML = this.responseText;
+        };
+
         xhr.open('POST', '/api/pdf2html');
         xhr.overrideMimeType('application/pdf');
         reader.onload = function (e) {
@@ -33,7 +38,7 @@
             console.log(xhr);
             xhr.send(e.target.result);
         }
-        reader.readAsBinaryString(file);
+        reader.readAsArrayBuffer(file);
     }
 
     function suppressEvent(e) {
@@ -47,8 +52,6 @@
         var dt = e.dataTransfer;
         var files = dt.files;
         
-        console.log(dt)
-        console.log(files[0])
         upload(files[0]);
     }
 
