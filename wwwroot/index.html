@@ -80,7 +80,8 @@ console.log(this.responseText);
                             upload(files[0]);
                         }
 
-                        this.innerHTML = '<div id="DropZone" style="background: rgba(230, 230, 230, 1); position: absolute; width: 100%; height: 100%;"></div>';
+                        this.innerHTML = '<div id="DropZone" style="background: rgba(230, 230, 230, 1); position: absolute; width: 100%; height: 100%;">' +
+                            'Drop your pdf here</div>';
 
                         var zone = document.getElementById('DropZone');
                         zone.addEventListener('dragenter', suppressEvent, false);
@@ -103,15 +104,46 @@ console.log(this.responseText);
             Tile.registerRenderer('pdf2html', JSF.ui.grid.tileRenderer.pdf2html);
         }(JSF, window.d3));
 
+        (function (JSF, d3) {
+            'use strict';
+
+            var Behavior = JSF.ui.grid.Behavior;
+            var Layout = JSF.ui.grid.Layout;
+
+            /** param should be an object in the form { cols: number, rows: number, priority: 'spacing' }
+             *  or a function that returns that object
+            */
+            function eventReceived(name, config, context, refresh, param) {
+                if (name === 'parent:reset' || name === 'parent:resize') {
+                    console.log(context);
+                    config.unit.width = context.parentWidth;
+                    config.unit.height = context.parentHeight;
+                    config.viewport.width = context.parentWidth;
+                    config.viewport.height = context.parentHeight;
+
+                    refresh();
+                }
+            }
+
+            var Panel = JSF.deriveClass(JSF.core.FrameworkObject,
+                false, // constructor
+                false, // instance members
+                {      // static members
+                    eventReceived: eventReceived
+                });
+
+            JSF.Namespace.define('JSF.ui.grid.behaviors', { Panel: Panel });
+
+            Behavior.registerBehaviorImplementation('panel', JSF.ui.grid.behaviors.Panel);
+        }(JSF, window.d3));
+
         var currentId = 0;
         var g1 = grid.control();
-        var unit = g1.unit();
-        unit.width = 1000;
-        unit.height = 500;
         g1.parentNode(document.getElementById('Content'))
-            .unit(unit)
             .tiles([pdf2htmlTile()])
             .display();
+
+        g1.behaviors({ panel: true }).display();
         
         function pdf2htmlTile() {
             return {
