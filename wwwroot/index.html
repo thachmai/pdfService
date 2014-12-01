@@ -54,7 +54,8 @@
                             var xhr = new XMLHttpRequest();
 
                             xhr.onload = function () {
-                                document.getElementById('DropZone').innerHTML = '<iframe>' + this.responseText + '</iframe>';
+console.log(this.responseText);
+                                document.getElementById('DropZone').innerHTML = this.responseText;
                             };
 
                             xhr.open('POST', '/api/pdf2html');
