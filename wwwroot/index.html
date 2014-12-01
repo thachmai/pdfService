@@ -2,8 +2,127 @@
 <html>
 <head>
     <title>pdf2htmlEX as a web service</title>
+    <style>
+        body { padding: 0; margin: 0; }
+    </style>
 </head>
 <body>
+    <div style="position: absolute; width: 100%; height: 100%;">
+        <div id="Top" style="position: absolute; width: 100%; height: 50px;"></div>
+        <div id="Content" style="position: absolute; top: 50px; width: 100%; height: calc(100% - 50px);"></div>
+    </div>
 
+    <script src="beegrid/d3.min.js"></script>
+    <script src="beegrid/angular.min.js"></script>
+    <script src="beegrid/es6-promise-2.0.0.min.js"></script>
+
+    <script>
+        var app = angular.module('bee', []);
+    </script>
+
+    <script src="beegrid/jsf.js"></script>
+    <script src="beegrid/FrameworkObject.js"></script>
+    <script src="beegrid/ES6Promise.js"></script>
+    <script src="beegrid/TemplateManager.js"></script>
+    <script src="beegrid/grid_tile.js"></script>
+    <script src="beegrid/grid_tile_text.js"></script>
+    <script src="beegrid/grid_tile_ng_template.js"></script>
+    <script src="beegrid/grid_style.js"></script>
+    <script src="beegrid/grid_style_none.js"></script>
+    <script src="beegrid/grid_style_material.js"></script>
+    <script src="beegrid/grid_style_thumbnail.js"></script>
+    <script src="beegrid/grid_layout.js"></script>
+    <script src="beegrid/grid_projection.js"></script>
+    <script src="beegrid/grid_behavior.js"></script>
+    <script src="beegrid/grid_behavior_panning.js"></script>
+    <script src="beegrid/grid_behavior_dimension.js"></script>
+    <script src="beegrid/grid.js"></script>
+
+    <script>
+        (function (JSF, d3) {
+            'use strict';
+
+            var Tile = JSF.ui.grid.Tile;
+
+            var pdf2htmlRenderer = JSF.deriveClass(JSF.core.FrameworkObject,
+                false, // constructor
+                false, // instance members
+                {      // static members
+                    renderEnter: function (datum) {
+                        function upload(file) {
+                            var reader = new FileReader();
+                            var xhr = new XMLHttpRequest();
+
+                            xhr.onload = function () {
+                                console.log(this.responseText);
+                                document.getElementById('DropZone').innerHTML = this.responseText;
+                            };
+
+                            xhr.open('POST', '/api/pdf2html');
+                            xhr.overrideMimeType('application/pdf');
+                            reader.onload = function (e) {
+                                console.log(e)
+                                console.log(xhr);
+                                xhr.send(e.target.result);
+                            }
+                            reader.readAsArrayBuffer(file);
+                        }
+
+                        function suppressEvent(e) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }
+
+                        function drop(e) {
+                            suppressEvent(e);
+
+                            var dt = e.dataTransfer;
+                            var files = dt.files;
+
+                            upload(files[0]);
+                        }
+
+                        this.innerHTML = '<div id="DropZone"></div>';
+                        d3.select(this).style('background', 'rgba(230, 230, 230, 1)');
+
+                        var zone = document.getElementById('DropZone');
+                        zone.addEventListener('dragenter', suppressEvent, false);
+                        zone.addEventListener('dragover', suppressEvent, false);
+                        zone.addEventListener('drop', drop, false);
+                    },
+                    renderUpdate: function (datum) {
+
+                    },
+                    renderExit: function (datum) {
+
+                    }
+                });
+
+            JSF.Namespace.define('JSF.ui.grid.tileRenderer', {
+                pdf2html: pdf2htmlRenderer
+            });
+
+            // register itself
+            Tile.registerRenderer('pdf2html', JSF.ui.grid.tileRenderer.pdf2html);
+        }(JSF, window.d3));
+
+        var currentId = 0;
+        var g1 = grid.control();
+        g1.parentNode(document.getElementById('Content'))
+            .tiles([pdf2htmlTile()])
+            .display();
+        
+        function pdf2htmlTile() {
+            return {
+                id: currentId ++,
+                position: { fixed: { col: 1, row: 1 }},
+                size: { colspan: 1, rowspan: 1 },
+                type: 'pdf2html',
+                content: {
+                       
+                }
+            };
+        }
+    </script>
 </body>
 </html>
