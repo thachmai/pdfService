@@ -54,15 +54,12 @@
                             var xhr = new XMLHttpRequest();
 
                             xhr.onload = function () {
-                                console.log(this.responseText);
-                                document.getElementById('DropZone').innerHTML = this.responseText;
+                                document.getElementById('DropZone').innerHTML = '<iframe>' + this.responseText + '</iframe>';
                             };
 
                             xhr.open('POST', '/api/pdf2html');
                             xhr.overrideMimeType('application/pdf');
                             reader.onload = function (e) {
-                                console.log(e)
-                                console.log(xhr);
                                 xhr.send(e.target.result);
                             }
                             reader.readAsArrayBuffer(file);
@@ -82,8 +79,7 @@
                             upload(files[0]);
                         }
 
-                        this.innerHTML = '<div id="DropZone"></div>';
-                        d3.select(this).style('background', 'rgba(230, 230, 230, 1)');
+                        this.innerHTML = '<div id="DropZone" style="background: rgba(230, 230, 230, 1); position: absolute; width: 100%; height: 100%;"></div>';
 
                         var zone = document.getElementById('DropZone');
                         zone.addEventListener('dragenter', suppressEvent, false);
@@ -108,14 +104,18 @@
 
         var currentId = 0;
         var g1 = grid.control();
+        var unit = g1.unit();
+        unit.width = 1000;
+        unit.height = 500;
         g1.parentNode(document.getElementById('Content'))
+            .unit(unit)
             .tiles([pdf2htmlTile()])
             .display();
         
         function pdf2htmlTile() {
             return {
                 id: currentId ++,
-                position: { fixed: { col: 1, row: 1 }},
+                position: { fixed: { col: 0, row: 0 }},
                 size: { colspan: 1, rowspan: 1 },
                 type: 'pdf2html',
                 content: {
