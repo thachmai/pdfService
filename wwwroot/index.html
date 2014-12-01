@@ -78,6 +78,9 @@ console.log(this.responseText);
                             var files = dt.files;
 
                             upload(files[0]);
+                            zone.removeEventListener('dragenter', suppressEvent, false);
+                            zone.removeEventListener('dragover', suppressEvent, false);
+                            zone.removeEventListener('drop', drop, false);
                         }
 
                         this.innerHTML = '<div id="DropZone" style="background: rgba(230, 230, 230, 1); position: absolute; width: 100%; height: 100%;">' +
